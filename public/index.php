@@ -8,7 +8,7 @@
 define('ABSPATH', __DIR__);
 
 // Load configuration
-require_once 'config/config.php';
+require_once dirname(__DIR__) . '/config/config.php';
 
 // Get the requested page from URL
 $current_page = $_GET['page'] ?? 'home';
