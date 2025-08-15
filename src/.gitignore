@@ -1,0 +1,28 @@
+# Contents of /agency-backend/agency-backend/.gitignore
+
+# This file specifies files and directories that should be ignored by Git.
+vendor/
+.env
+logs/
+*.log
+*.tmp
+.DS_Store
+.idea/
+*.swp
+*.swo
+*.bak
+*.orig
+*.class
+*.jar
+*.war
+*.zip
+*.tar
+*.gz
+*.tgz
+*.7z
+*.exe
+*.dll
+*.so
+*.dylib
+node_modules/
+public/uploads/
