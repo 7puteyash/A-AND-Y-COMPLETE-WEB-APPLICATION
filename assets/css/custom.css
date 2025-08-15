@@ -1,0 +1,92 @@
+/* A&Y Custom Theme Styles */
+
+:root {
+    --dark-base: #1a1a1a;
+    --gold-accent: #ffd700;
+    --gold-hover: #ffed4a;
+    --text-light: #ffffff;
+    --text-dark: #333333;
+}
+
+/* Global Styles */
+body {
+    background-color: var(--dark-base);
+    color: var(--text-light);
+}
+
+/* Hero Section */
+.hero {
+    aspect-ratio: 1/1;
+    position: relative;
+    background-color: var(--dark-base);
+    overflow: hidden;
+}
+
+.hero-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 80%;
+}
+
+/* Accent Elements */
+.accent-text {
+    color: var(--gold-accent);
+}
+
+.accent-btn {
+    background-color: var(--gold-accent);
+    color: var(--text-dark);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.accent-btn:hover {
+    background-color: var(--gold-hover);
+}
+
+/* Section Headers */
+.section-header {
+    border-bottom: 2px solid var(--gold-accent);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Navigation */
+.nav-link:hover {
+    color: var(--gold-accent) !important;
+}
+
+/* Cards and Project Items */
+.card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--gold-accent);
+}
+
+.project-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.project-overlay {
+    background: rgba(26, 26, 26, 0.9);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.project-item:hover .project-overlay {
+    opacity: 1;
+}
+
+/* Footer */
+.footer {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid var(--gold-accent);
+}
