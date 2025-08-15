@@ -1,8 +1,8 @@
 <?php
+require_once __DIR__ . '/../../vendor/autoload.php'; // Ensure autoloader is loaded first
 require_once 'includes/db_functions.php';
 require_once 'includes/validation.php';
 require_once 'config/email.php';
-require_once __DIR__ . '/../../vendor/autoload.php'; // Adjust path if needed
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
