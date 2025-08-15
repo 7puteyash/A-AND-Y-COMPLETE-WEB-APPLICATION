@@ -24,12 +24,12 @@ foreach ($leads as $lead) {
     echo "Created at: " . $lead['created_at'] . "\n";
 }
 
-// Test insertAdmin function (commented out for safety)
-/*
-echo "\nTesting insertAdmin function...\n";
-$result = insertAdmin(
-    "admin",
-    password_hash("your_password_here", PASSWORD_DEFAULT)
-);
-echo $result ? "Admin user inserted successfully\n" : "Failed to insert admin user\n";
-*/
+// Test admin functions
+echo "\nTesting admin functions...\n";
+// First create an admin user
+$result = insertAdmin("testadmin", "test123");
+echo $result ? "Admin user created successfully\n" : "Failed to create admin user\n";
+
+// Then test login
+$admin = verifyAdminLogin("testadmin", "test123");
+echo $admin ? "Admin login successful\n" : "Admin login failed\n";

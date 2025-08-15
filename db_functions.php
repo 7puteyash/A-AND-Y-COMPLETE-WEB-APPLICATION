@@ -32,13 +32,28 @@ function getLeads() {
 /**
  * Insert a new admin user into the database
  */
-function insertAdmin($username, $password_hash) {
+function insertAdmin($username, $password) {
     global $pdo;
     try {
-        $stmt = $pdo->prepare("INSERT INTO admin_users (username, password_hash) VALUES (?, ?)");
-        return $stmt->execute([$username, $password_hash]);
+        $stmt = $pdo->prepare("INSERT INTO admin_users (username, password) VALUES (?, ?)");
+        return $stmt->execute([$username, $password]);
     } catch (PDOException $e) {
         error_log("Error inserting admin user: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Verify admin login
+ */
+function verifyAdminLogin($username, $password) {
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE username = ? AND password = ? LIMIT 1");
+        $stmt->execute([$username, $password]);
+        return $stmt->fetch();
+    } catch (PDOException $e) {
+        error_log("Error verifying admin login: " . $e->getMessage());
         return false;
     }
 }
