@@ -1,0 +1,27 @@
+# Prevent direct access to includes directory
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(includes|config) - [F,L]
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
+
+# Deny access to files with sensitive extensions
+<FilesMatch "\.(php|config|json|lock|git|sql)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Allow access to public/index.php
+<Files "index.php">
+    Order Allow,Deny
+    Allow from all
+</Files>
+
+# Protect against common exploits
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
