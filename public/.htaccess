@@ -1,16 +1,16 @@
-Options +FollowSymLinks -MultiViews
+# Basic settings
+Options +Indexes +FollowSymLinks
+Order Allow,Deny
+Allow from all
+
+# Enable rewrite engine
 RewriteEngine On
+RewriteBase /BUNDI-AND-LADU/A-AND-Y-WEB-APPLICATION/public/
 
-# Allow access to all files in public directory
-<Files *>
-    Order Allow,Deny
-    Allow from all
-    Require all granted
-</Files>
+# Allow direct access to files
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
 
-# PHP files can be accessed directly in public folder
-<FilesMatch "\.php$">
-    Order Allow,Deny
-    Allow from all
-    Require all granted
-</FilesMatch>
+# Route everything else to index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [L]

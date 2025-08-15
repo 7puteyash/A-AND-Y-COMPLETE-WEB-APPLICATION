@@ -1,0 +1,7 @@
+# Allow access to test directory
+Options +Indexes +FollowSymLinks
+Require all granted
+
+<FilesMatch "\.php$">
+    Require all granted
+</FilesMatch>
