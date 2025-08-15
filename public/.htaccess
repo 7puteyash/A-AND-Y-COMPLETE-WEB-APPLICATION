@@ -1,0 +1,16 @@
+Options +FollowSymLinks -MultiViews
+RewriteEngine On
+
+# Allow access to all files in public directory
+<Files *>
+    Order Allow,Deny
+    Allow from all
+    Require all granted
+</Files>
+
+# PHP files can be accessed directly in public folder
+<FilesMatch "\.php$">
+    Order Allow,Deny
+    Allow from all
+    Require all granted
+</FilesMatch>
