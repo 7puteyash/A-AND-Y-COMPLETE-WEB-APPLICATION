@@ -1,0 +1,30 @@
+name: PHP CI
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  php-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, intl, pdo_mysql
+        coverage: none
+
+    - name: Validate composer.json
+      if: hashFiles('composer.json') != ''
+      run: |
+        if [ -f "composer.json" ]; then
+          composer validate --strict
+        fi
+
+    - name: PHP Lint
+      run: |
+        find . -type f -name '*.php' -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
