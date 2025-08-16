@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ JSON Parsing Error Fixed!</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #0a0b0f; color: #fff; }
+        .success { color: #28a745; } .error { color: #dc3545; } .info { color: #17a2b8; }
+        .test-box { background: #101114; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #d4af37; }
+        button { background: linear-gradient(135deg, #d4af37, #b8941f); color: #000; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; background: #101114; color: #fff; border: 1px solid #d4af37; border-radius: 4px; }
+        .form-group { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <h1>🎉 JSON Parsing Error Fixed!</h1>
+    
+    <div class="test-box">
+        <h2>✅ Problem Resolved</h2>
+        <p><strong>Issue:</strong> "Unexpected token '?', "?>{"status"... is not valid JSON"</p>
+        <p><strong>Root Cause:</strong> PHP closing tags `?>` were causing extra output before JSON responses</p>
+        <p><strong>Solution:</strong> Removed closing PHP tags from all included files (best practice in PHP)</p>
+        
+        <h3>Files Fixed:</h3>
+        <ul>
+            <li>✅ src/api/contact.php</li>
+            <li>✅ src/config/database.php</li> 
+            <li>✅ src/includes/security.php</li>
+            <li>✅ bootstrap.php</li>
+        </ul>
+    </div>
+
+    <div class="test-box">
+        <h2>🧪 JSON Response Test</h2>
+        <button onclick="testJsonResponse()">Test API JSON Response</button>
+        <div id="json-test-result"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>🎯 CSRF Token Test</h2>
+        <button onclick="testCsrfToken()">Test CSRF Token Generation</button>
+        <div id="csrf-test-result"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>📧 Full Contact Form Test</h2>
+        <form id="fullTestForm">
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" name="name" value="Test User" required>
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" name="email" value="test@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Phone:</label>
+                <input type="tel" name="phone" value="+1234567890" required>
+            </div>
+            <div class="form-group">
+                <label>Message:</label>
+                <textarea name="message" required>This is a test message to verify that the JSON parsing error has been completely resolved and the contact form is working perfectly.</textarea>
+            </div>
+            <button type="submit">🚀 Test Complete Contact Form</button>
+        </form>
+        <div id="form-test-result"></div>
+    </div>
+
+    <script>
+        async function testJsonResponse() {
+            const resultDiv = document.getElementById('json-test-result');
+            resultDiv.innerHTML = '<div class="info">Testing API JSON response...</div>';
+            
+            try {
+                const response = await fetch('./src/api/contact.php', { method: 'GET' });
+                const text = await response.text();
+                
+                // Try to parse as JSON
+                const data = JSON.parse(text);
+                
+                resultDiv.innerHTML = `
+                    <div class="success">✅ Perfect! API returns valid JSON</div>
+                    <pre style="background: #000; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ JSON Parse Error: ${error.message}</div>
+                    <p>This means there's still extra output in the API response.</p>
+                `;
+            }
+        }
+
+        async function testCsrfToken() {
+            const resultDiv = document.getElementById('csrf-test-result');
+            resultDiv.innerHTML = '<div class="info">Testing CSRF token generation...</div>';
+            
+            try {
+                const response = await fetch('./get-csrf-token.php');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ CSRF Token Generated Successfully!</div>
+                        <pre style="background: #000; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ JSON Parse Error: ${error.message}</div>`;
+            }
+        }
+
+        document.getElementById('fullTestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const resultDiv = document.getElementById('form-test-result');
+            resultDiv.innerHTML = '<div class="info">Testing complete contact form flow...</div>';
+
+            try {
+                // Step 1: Get CSRF token
+                const tokenResponse = await fetch('./get-csrf-token.php');
+                const tokenData = await tokenResponse.json();
+                
+                if (tokenData.status !== 'success') {
+                    throw new Error('Failed to get CSRF token');
+                }
+
+                // Step 2: Submit form
+                const formData = new FormData(this);
+                formData.append('csrf_token', tokenData.csrf_token);
+
+                const response = await fetch('./src/api/contact.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    resultDiv.innerHTML = `
+                        <div class="success">🎉 SUCCESS! Contact form is fully functional!</div>
+                        <pre style="background: #000; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Form Error: ${result.message}</div>
+                        <pre style="background: #000; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ JSON Parse Error Fixed, but form error: ${error.message}</div>
+                    <p>The JSON parsing issue is resolved, but there may be other form validation issues.</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

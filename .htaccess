@@ -7,14 +7,14 @@
 # Prevent directory listing
 Options -Indexes
 
-# Deny access to files with sensitive extensions
-<FilesMatch "\.(php|config|json|lock|git|sql)$">
+# Deny access to files with sensitive extensions except in public directory
+<FilesMatch "\.(config|json|lock|git|sql)$">
     Order Allow,Deny
     Deny from all
 </FilesMatch>
 
-# Allow access to public/index.php
-<Files "index.php">
+# Allow access to PHP files
+<Files "*.php">
     Order Allow,Deny
     Allow from all
 </Files>

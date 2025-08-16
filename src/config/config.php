@@ -15,4 +15,3 @@ date_default_timezone_set('America/New_York');
 define('LOG_FILE', __DIR__ . '/../logs/error.log');
 define('EMAIL_FROM', 'agency@ay.com');
 define('EMAIL_SUBJECT', 'New Lead Submission');
-?>

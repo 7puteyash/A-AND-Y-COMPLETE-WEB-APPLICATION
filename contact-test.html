@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Form Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0a0b0f;
+            color: #ffffff;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d4af37;
+            border-radius: 5px;
+            background: #101114;
+            color: #ffffff;
+        }
+        .btn {
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .alert {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .alert-success {
+            background: #28a745;
+            border: 1px solid #1e7e34;
+        }
+        .alert-error {
+            background: #dc3545;
+            border: 1px solid #bd2130;
+        }
+        .alert-info {
+            background: #17a2b8;
+            border: 1px solid #138496;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Contact Form API Test</h1>
+    <p>This is a direct test of the contact form API without the rate limiting issues.</p>
+    
+    <div id="status" class="alert alert-info">
+        Ready to test! Fill out the form and click submit.
+    </div>
+
+    <form id="testForm">
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" class="form-control" value="Test User" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" class="form-control" value="test@example.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" name="phone" class="form-control" value="1234567890" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" class="form-control" rows="4" required>This is a test message from the contact form API test page.</textarea>
+        </div>
+        
+        <button type="submit" class="btn">🚀 Test Contact Form</button>
+        <button type="button" class="btn" onclick="clearRateLimit()">🔄 Clear Rate Limit</button>
+    </form>
+
+    <div id="response" style="margin-top: 20px;"></div>
+
+    <script>
+        // Get CSRF token first
+        async function getCsrfToken() {
+            try {
+                // Try the dedicated CSRF endpoint first
+                const tokenResponse = await fetch('./get-csrf-token.php', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+                
+                if (tokenResponse.ok) {
+                    const tokenData = await tokenResponse.json();
+                    if (tokenData.status === 'success') {
+                        return tokenData.csrf_token;
+                    }
+                }
+                
+                // Fallback: fetch from contact page
+                const response = await fetch('/?page=contact', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const csrfInput = doc.querySelector('input[name="csrf_token"]');
+                return csrfInput ? csrfInput.value : null;
+            } catch (error) {
+                console.error('Error getting CSRF token:', error);
+                return null;
+            }
+        }
+
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const statusDiv = document.getElementById('status');
+            const responseDiv = document.getElementById('response');
+            
+            statusDiv.className = 'alert alert-info';
+            statusDiv.textContent = '⏳ Testing contact form...';
+            
+            try {
+                // Get CSRF token
+                const csrfToken = await getCsrfToken();
+                if (!csrfToken) {
+                    throw new Error('Could not get CSRF token');
+                }
+
+                const formData = new FormData();
+                formData.append('name', document.getElementById('name').value);
+                formData.append('email', document.getElementById('email').value);
+                formData.append('phone', document.getElementById('phone').value);
+                formData.append('message', document.getElementById('message').value);
+                formData.append('csrf_token', csrfToken);
+
+                const response = await fetch('src/api/contact.php', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    statusDiv.className = 'alert alert-success';
+                    statusDiv.textContent = '✅ Success! Contact form is working perfectly.';
+                    responseDiv.innerHTML = `
+                        <h3>Success Response:</h3>
+                        <pre style="background: #000; padding: 10px; border-radius: 5px; overflow-x: auto;">${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    statusDiv.className = 'alert alert-error';
+                    statusDiv.textContent = `❌ Error ${response.status}: ${result.message}`;
+                    responseDiv.innerHTML = `
+                        <h3>Error Response:</h3>
+                        <pre style="background: #000; padding: 10px; border-radius: 5px; overflow-x: auto;">${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.className = 'alert alert-error';
+                statusDiv.textContent = `❌ Network Error: ${error.message}`;
+                responseDiv.innerHTML = `
+                    <h3>Error Details:</h3>
+                    <p>${error.toString()}</p>
+                `;
+            }
+        });
+
+        async function clearRateLimit() {
+            const statusDiv = document.getElementById('status');
+            try {
+                const response = await fetch('clear-rate-limit.php');
+                const result = await response.text();
+                statusDiv.className = 'alert alert-success';
+                statusDiv.textContent = '🔄 Rate limit cleared! You can now test immediately.';
+            } catch (error) {
+                statusDiv.className = 'alert alert-error';
+                statusDiv.textContent = `❌ Error clearing rate limit: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

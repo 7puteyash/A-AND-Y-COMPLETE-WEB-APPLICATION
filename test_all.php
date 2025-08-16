@@ -67,7 +67,7 @@ try {
     // Test admin_users table
     $stmt = $pdo->query("DESCRIBE admin_users");
     $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    $required_admin_columns = ['id', 'username', 'password', 'created_at'];
+    $required_admin_columns = ['id', 'username', 'password_hash', 'created_at'];
     $missing_admin_columns = array_diff($required_admin_columns, $columns);
     
     if (empty($missing_admin_columns)) {

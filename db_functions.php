@@ -35,8 +35,9 @@ function getLeads() {
 function insertAdmin($username, $password) {
     global $pdo;
     try {
-        $stmt = $pdo->prepare("INSERT INTO admin_users (username, password) VALUES (?, ?)");
-        return $stmt->execute([$username, $password]);
+        $password_hash = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("INSERT INTO admin_users (username, password_hash) VALUES (?, ?)");
+        return $stmt->execute([$username, $password_hash]);
     } catch (PDOException $e) {
         error_log("Error inserting admin user: " . $e->getMessage());
         return false;
@@ -49,9 +50,14 @@ function insertAdmin($username, $password) {
 function verifyAdminLogin($username, $password) {
     global $pdo;
     try {
-        $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE username = ? AND password = ? LIMIT 1");
-        $stmt->execute([$username, $password]);
-        return $stmt->fetch();
+        $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE username = ? LIMIT 1");
+        $stmt->execute([$username]);
+        $user = $stmt->fetch();
+        
+        if ($user && password_verify($password, $user['password_hash'])) {
+            return $user;
+        }
+        return false;
     } catch (PDOException $e) {
         error_log("Error verifying admin login: " . $e->getMessage());
         return false;

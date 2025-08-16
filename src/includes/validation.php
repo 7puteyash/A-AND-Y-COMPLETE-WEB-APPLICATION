@@ -1,3 +1,4 @@
+<?php
 function validateRequiredFields($data, $fields) {
     $errors = [];
     foreach ($fields as $field) {

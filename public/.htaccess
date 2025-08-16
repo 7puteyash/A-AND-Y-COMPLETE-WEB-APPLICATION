@@ -5,7 +5,7 @@ Allow from all
 
 # Enable rewrite engine
 RewriteEngine On
-RewriteBase /BUNDI-AND-LADU/A-AND-Y-WEB-APPLICATION/public/
+RewriteBase /say/A-AND-Y-WEB-APPLICATION/public/
 
 # Allow direct access to files
 RewriteCond %{REQUEST_FILENAME} -f

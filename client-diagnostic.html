@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client-Side Network Diagnostics</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; background: #0a0b0f; color: #ffffff; }
+        .test-section { background: #101114; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #d4af37; }
+        .success { color: #28a745; } .error { color: #dc3545; } .warning { color: #ffc107; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .test-success { background: rgba(40, 167, 69, 0.1); border-left: 4px solid #28a745; }
+        .test-error { background: rgba(220, 53, 69, 0.1); border-left: 4px solid #dc3545; }
+        .test-warning { background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; }
+        button { padding: 10px 20px; background: linear-gradient(135deg, #d4af37, #b8941f); color: #000; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        pre { background: #000; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🌐 CLIENT-SIDE NETWORK DIAGNOSTICS</h1>
+
+    <div class="test-section">
+        <h2>1. 📡 Basic Connectivity Tests</h2>
+        <button onclick="testConnectivity()">Run Connectivity Tests</button>
+        <div id="connectivity-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 🔐 CSRF Token Tests</h2>
+        <button onclick="testCSRF()">Test CSRF Token</button>
+        <div id="csrf-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 📧 API Endpoint Tests</h2>
+        <button onclick="testAPIEndpoints()">Test All API Endpoints</button>
+        <div id="api-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. 🔄 Form Submission Tests</h2>
+        <button onclick="testFormSubmission()">Test Form Submission</button>
+        <div id="form-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. 🌍 Browser Environment Tests</h2>
+        <button onclick="testBrowserEnv()">Test Browser Environment</button>
+        <div id="browser-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>6. 📊 Network Performance Tests</h2>
+        <button onclick="testPerformance()">Test Network Performance</button>
+        <div id="performance-results"></div>
+    </div>
+
+    <script>
+        function logResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result test-${type}`;
+            resultDiv.innerHTML = message;
+            container.appendChild(resultDiv);
+        }
+
+        function clearResults(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+        }
+
+        // 1. Connectivity Tests
+        async function testConnectivity() {
+            clearResults('connectivity-results');
+            logResult('connectivity-results', '🔄 Starting connectivity tests...', 'warning');
+
+            const tests = [
+                { name: 'Server Root', url: './' },
+                { name: 'Contact Page', url: './?page=contact' },
+                { name: 'CSRF Endpoint', url: './get-csrf-token.php' },
+                { name: 'Contact API', url: './src/api/contact.php' },
+                { name: 'Server Diagnostic', url: './server-diagnostic.php' }
+            ];
+
+            for (const test of tests) {
+                try {
+                    const startTime = performance.now();
+                    const response = await fetch(test.url, { method: 'GET' });
+                    const endTime = performance.now();
+                    const responseTime = Math.round(endTime - startTime);
+
+                    if (response.ok) {
+                        logResult('connectivity-results', 
+                            `✅ ${test.name}: Status ${response.status} (${responseTime}ms)`, 'success');
+                    } else {
+                        logResult('connectivity-results', 
+                            `⚠️ ${test.name}: Status ${response.status} (${responseTime}ms)`, 'warning');
+                    }
+                } catch (error) {
+                    logResult('connectivity-results', 
+                        `❌ ${test.name}: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // 2. CSRF Token Tests
+        async function testCSRF() {
+            clearResults('csrf-results');
+            logResult('csrf-results', '🔄 Testing CSRF token generation...', 'warning');
+
+            try {
+                // Test dedicated endpoint
+                const response = await fetch('./get-csrf-token.php');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    logResult('csrf-results', '✅ CSRF endpoint working correctly', 'success');
+                    logResult('csrf-results', `Token: ${data.csrf_token.substring(0, 20)}...`, 'success');
+                    logResult('csrf-results', `Session ID: ${data.session_id}`, 'success');
+                } else {
+                    logResult('csrf-results', `❌ CSRF endpoint error: ${data.message}`, 'error');
+                }
+
+                // Test contact page token
+                const contactResponse = await fetch('./?page=contact');
+                const html = await contactResponse.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const csrfInput = doc.querySelector('input[name="csrf_token"]');
+
+                if (csrfInput && csrfInput.value) {
+                    logResult('csrf-results', '✅ Contact page CSRF token found', 'success');
+                    logResult('csrf-results', `Page token: ${csrfInput.value.substring(0, 20)}...`, 'success');
+                } else {
+                    logResult('csrf-results', '❌ No CSRF token found in contact page', 'error');
+                }
+
+            } catch (error) {
+                logResult('csrf-results', `❌ CSRF test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // 3. API Endpoint Tests
+        async function testAPIEndpoints() {
+            clearResults('api-results');
+            logResult('api-results', '🔄 Testing API endpoints...', 'warning');
+
+            // Test GET request (should return method not allowed)
+            try {
+                const response = await fetch('./src/api/contact.php', { method: 'GET' });
+                const text = await response.text();
+                
+                try {
+                    const data = JSON.parse(text);
+                    if (data.status === 'error' && data.message.includes('Method not allowed')) {
+                        logResult('api-results', '✅ GET request properly rejected', 'success');
+                    } else {
+                        logResult('api-results', `⚠️ Unexpected GET response: ${JSON.stringify(data)}`, 'warning');
+                    }
+                } catch (parseError) {
+                    logResult('api-results', `❌ GET response not valid JSON: ${text.substring(0, 100)}...`, 'error');
+                }
+            } catch (error) {
+                logResult('api-results', `❌ GET test failed: ${error.message}`, 'error');
+            }
+
+            // Test POST without CSRF (should be rejected)
+            try {
+                const formData = new FormData();
+                formData.append('name', 'Test User');
+                formData.append('email', 'test@example.com');
+                formData.append('phone', '1234567890');
+                formData.append('message', 'Test message');
+
+                const response = await fetch('./src/api/contact.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const text = await response.text();
+                try {
+                    const data = JSON.parse(text);
+                    if (data.status === 'error' && data.message.includes('security token')) {
+                        logResult('api-results', '✅ POST without CSRF properly rejected', 'success');
+                    } else {
+                        logResult('api-results', `⚠️ Unexpected POST response: ${JSON.stringify(data)}`, 'warning');
+                    }
+                } catch (parseError) {
+                    logResult('api-results', `❌ POST response not valid JSON: ${text.substring(0, 100)}...`, 'error');
+                }
+            } catch (error) {
+                logResult('api-results', `❌ POST test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // 4. Form Submission Tests
+        async function testFormSubmission() {
+            clearResults('form-results');
+            logResult('form-results', '🔄 Testing complete form submission flow...', 'warning');
+
+            try {
+                // Get CSRF token
+                const csrfResponse = await fetch('./get-csrf-token.php');
+                const csrfData = await csrfResponse.json();
+                
+                if (csrfData.status !== 'success') {
+                    throw new Error('Could not get CSRF token');
+                }
+
+                logResult('form-results', '✅ CSRF token obtained', 'success');
+
+                // Submit form with valid data
+                const formData = new FormData();
+                formData.append('name', 'Test User');
+                formData.append('email', 'test@example.com');
+                formData.append('phone', '1234567890');
+                formData.append('message', 'This is a comprehensive test of the form submission system.');
+                formData.append('csrf_token', csrfData.csrf_token);
+
+                const response = await fetch('./src/api/contact.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const responseText = await response.text();
+                logResult('form-results', `Response status: ${response.status}`, response.ok ? 'success' : 'error');
+                logResult('form-results', `Raw response: ${responseText}`, 'info');
+
+                try {
+                    const data = JSON.parse(responseText);
+                    if (data.status === 'success') {
+                        logResult('form-results', '✅ Form submission successful!', 'success');
+                    } else {
+                        logResult('form-results', `⚠️ Form submission issue: ${data.message}`, 'warning');
+                    }
+                } catch (parseError) {
+                    logResult('form-results', `❌ Response parsing failed: ${parseError.message}`, 'error');
+                    logResult('form-results', `This suggests output before JSON: ${responseText.substring(0, 200)}`, 'error');
+                }
+
+            } catch (error) {
+                logResult('form-results', `❌ Form submission test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // 5. Browser Environment Tests
+        function testBrowserEnv() {
+            clearResults('browser-results');
+            logResult('browser-results', '🔄 Testing browser environment...', 'warning');
+
+            // Check browser capabilities
+            const checks = [
+                { name: 'Fetch API', test: () => typeof fetch !== 'undefined' },
+                { name: 'FormData', test: () => typeof FormData !== 'undefined' },
+                { name: 'JSON', test: () => typeof JSON !== 'undefined' },
+                { name: 'Promises', test: () => typeof Promise !== 'undefined' },
+                { name: 'Local Storage', test: () => typeof localStorage !== 'undefined' },
+                { name: 'Session Storage', test: () => typeof sessionStorage !== 'undefined' }
+            ];
+
+            checks.forEach(check => {
+                const result = check.test();
+                logResult('browser-results', 
+                    `${result ? '✅' : '❌'} ${check.name}: ${result ? 'Available' : 'Not Available'}`, 
+                    result ? 'success' : 'error');
+            });
+
+            // Browser info
+            logResult('browser-results', `User Agent: ${navigator.userAgent}`, 'info');
+            logResult('browser-results', `URL: ${window.location.href}`, 'info');
+            logResult('browser-results', `Protocol: ${window.location.protocol}`, 'info');
+        }
+
+        // 6. Performance Tests
+        async function testPerformance() {
+            clearResults('performance-results');
+            logResult('performance-results', '🔄 Testing network performance...', 'warning');
+
+            const endpoints = [
+                './get-csrf-token.php',
+                './?page=contact',
+                './src/api/contact.php'
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    const times = [];
+                    for (let i = 0; i < 3; i++) {
+                        const start = performance.now();
+                        const response = await fetch(endpoint, { method: 'GET' });
+                        const end = performance.now();
+                        times.push(end - start);
+                        
+                        if (i === 0) { // Only log status for first request
+                            logResult('performance-results', 
+                                `📊 ${endpoint}: Status ${response.status}`, 
+                                response.ok ? 'success' : 'warning');
+                        }
+                    }
+                    
+                    const avgTime = Math.round(times.reduce((a, b) => a + b) / times.length);
+                    const minTime = Math.round(Math.min(...times));
+                    const maxTime = Math.round(Math.max(...times));
+                    
+                    logResult('performance-results', 
+                        `⏱️ Response times - Avg: ${avgTime}ms, Min: ${minTime}ms, Max: ${maxTime}ms`, 
+                        avgTime < 500 ? 'success' : avgTime < 1000 ? 'warning' : 'error');
+                        
+                } catch (error) {
+                    logResult('performance-results', 
+                        `❌ Performance test failed for ${endpoint}: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Auto-run browser environment test on load
+        window.addEventListener('load', () => {
+            testBrowserEnv();
+        });
+    </script>
+</body>
+</html>

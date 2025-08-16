@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Network Error Diagnostic Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0b0f, #101114);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 15px;
+            border: 2px solid #d4af37;
+        }
+        
+        .diagnostic-section {
+            background: rgba(16, 17, 20, 0.9);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        
+        .status-good { color: #28a745; }
+        .status-warning { color: #ffc107; }
+        .status-error { color: #dc3545; }
+        
+        .test-button {
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+        
+        .url-list {
+            background: #000;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #d4af37;
+            margin: 10px 0;
+        }
+        
+        .url-list a {
+            color: #d4af37;
+            text-decoration: none;
+            font-family: monospace;
+            font-size: 14px;
+            display: block;
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .url-list a:hover {
+            background: rgba(212, 175, 55, 0.2);
+        }
+        
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            min-height: 50px;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #d4af37, #ffd700);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .solution-box {
+            background: rgba(40, 167, 69, 0.1);
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .browser-info {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Network Error Diagnostic Tool</h1>
+            <p>Let's solve this network error once and for all!</p>
+            <div class="browser-info" id="browserInfo"></div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h2>📊 Server Status Check</h2>
+            <p>Current time: <span id="currentTime"></span></p>
+            <button class="test-button" onclick="testServerStatus()">🔍 Test Server Status</button>
+            <div class="progress"><div class="progress-bar" id="serverProgress"></div></div>
+            <div class="results" id="serverResults">
+                <p>Click "Test Server Status" to check if XAMPP and Apache are working...</p>
+            </div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h2>🌐 URL Accessibility Test</h2>
+            <p>Testing all your website URLs...</p>
+            <button class="test-button" onclick="testAllUrls()">🚀 Test All URLs</button>
+            <div class="progress"><div class="progress-bar" id="urlProgress"></div></div>
+            <div class="results" id="urlResults">
+                <p>Click "Test All URLs" to check accessibility...</p>
+            </div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h2>🎯 Direct URL Links</h2>
+            <p>Try these URLs directly in your browser:</p>
+            <div class="url-list">
+                <a href="http://localhost/say/A-AND-Y-WEB-APPLICATION/" target="_blank">
+                    ➤ Main Website: http://localhost/say/A-AND-Y-WEB-APPLICATION/
+                </a>
+                <a href="http://localhost/say/A-AND-Y-WEB-APPLICATION/admin.php" target="_blank">
+                    ➤ Admin Panel: http://localhost/say/A-AND-Y-WEB-APPLICATION/admin.php
+                </a>
+                <a href="http://localhost/say/A-AND-Y-WEB-APPLICATION/logo-test.html" target="_blank">
+                    ➤ Logo Test: http://localhost/say/A-AND-Y-WEB-APPLICATION/logo-test.html
+                </a>
+                <a href="http://localhost/say/A-AND-Y-WEB-APPLICATION/?page=about" target="_blank">
+                    ➤ About Page: http://localhost/say/A-AND-Y-WEB-APPLICATION/?page=about
+                </a>
+                <a href="http://localhost/say/A-AND-Y-WEB-APPLICATION/?page=contact" target="_blank">
+                    ➤ Contact Page: http://localhost/say/A-AND-Y-WEB-APPLICATION/?page=contact
+                </a>
+            </div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h2>💊 Common Solutions</h2>
+            <div class="solution-box">
+                <h3>🔥 If you're still getting network errors, try these steps:</h3>
+                <ol>
+                    <li><strong>Hard Refresh:</strong> Press Ctrl + F5 (Windows) or Cmd + Shift + R (Mac)</li>
+                    <li><strong>Clear Browser Cache:</strong> Ctrl + Shift + Delete, select "All time"</li>
+                    <li><strong>Try Incognito/Private Mode:</strong> Ctrl + Shift + N</li>
+                    <li><strong>Try Different Browser:</strong> Chrome, Firefox, Edge, or Safari</li>
+                    <li><strong>Disable Extensions:</strong> Turn off all browser extensions temporarily</li>
+                    <li><strong>Check Antivirus:</strong> Temporarily disable antivirus software</li>
+                    <li><strong>Restart Browser:</strong> Close completely and reopen</li>
+                    <li><strong>Restart XAMPP:</strong> Stop and start Apache in XAMPP Control Panel</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h2>🔧 System Information</h2>
+            <div id="systemInfo">
+                <p>Loading system information...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update current time
+        function updateTime() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleString();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Browser info
+        document.getElementById('browserInfo').innerHTML = `
+            Browser: ${navigator.userAgent}<br>
+            Platform: ${navigator.platform}<br>
+            Language: ${navigator.language}<br>
+            Online: ${navigator.onLine ? '✅ Yes' : '❌ No'}
+        `;
+
+        // System info
+        document.getElementById('systemInfo').innerHTML = `
+            <strong>Browser:</strong> ${navigator.appName}<br>
+            <strong>Version:</strong> ${navigator.appVersion}<br>
+            <strong>User Agent:</strong> ${navigator.userAgent}<br>
+            <strong>Platform:</strong> ${navigator.platform}<br>
+            <strong>Language:</strong> ${navigator.language}<br>
+            <strong>Cookies Enabled:</strong> ${navigator.cookieEnabled ? '✅ Yes' : '❌ No'}<br>
+            <strong>Online Status:</strong> ${navigator.onLine ? '✅ Online' : '❌ Offline'}<br>
+            <strong>Screen Resolution:</strong> ${screen.width} x ${screen.height}<br>
+            <strong>Current URL:</strong> ${window.location.href}
+        `;
+
+        // Test server status
+        async function testServerStatus() {
+            const results = document.getElementById('serverResults');
+            const progress = document.getElementById('serverProgress');
+            
+            results.innerHTML = '<p>⏳ Testing server status...</p>';
+            progress.style.width = '20%';
+            
+            const tests = [
+                { name: 'XAMPP Root', url: 'http://localhost/' },
+                { name: 'Say Directory', url: 'http://localhost/say/' },
+                { name: 'Application Root', url: 'http://localhost/say/A-AND-Y-WEB-APPLICATION/' },
+                { name: 'PHP Test', url: 'http://localhost/say/A-AND-Y-WEB-APPLICATION/server_test.php' }
+            ];
+            
+            let html = '<h4>Server Test Results:</h4>';
+            let successCount = 0;
+            
+            for (let i = 0; i < tests.length; i++) {
+                try {
+                    progress.style.width = (20 + (i + 1) * 20) + '%';
+                    const response = await fetch(tests[i].url, { 
+                        method: 'HEAD',
+                        cache: 'no-cache',
+                        mode: 'no-cors'
+                    });
+                    html += `<p class="status-good">✅ ${tests[i].name}: Accessible</p>`;
+                    successCount++;
+                } catch (error) {
+                    html += `<p class="status-error">❌ ${tests[i].name}: ${error.message}</p>`;
+                }
+            }
+            
+            progress.style.width = '100%';
+            
+            if (successCount === tests.length) {
+                html += '<div class="solution-box"><p class="status-good"><strong>🎉 All servers are working! The issue is likely browser-related.</strong></p></div>';
+            } else {
+                html += '<div class="solution-box"><p class="status-error"><strong>⚠️ Server issues detected. Please check XAMPP.</strong></p></div>';
+            }
+            
+            results.innerHTML = html;
+        }
+
+        // Test all URLs
+        async function testAllUrls() {
+            const results = document.getElementById('urlResults');
+            const progress = document.getElementById('urlProgress');
+            
+            results.innerHTML = '<p>⏳ Testing all URLs...</p>';
+            progress.style.width = '10%';
+            
+            const urls = [
+                'http://localhost/say/A-AND-Y-WEB-APPLICATION/',
+                'http://localhost/say/A-AND-Y-WEB-APPLICATION/admin.php',
+                'http://localhost/say/A-AND-Y-WEB-APPLICATION/?page=about',
+                'http://localhost/say/A-AND-Y-WEB-APPLICATION/?page=contact',
+                'http://localhost/say/A-AND-Y-WEB-APPLICATION/logo-test.html'
+            ];
+            
+            let html = '<h4>URL Test Results:</h4>';
+            let successCount = 0;
+            
+            for (let i = 0; i < urls.length; i++) {
+                try {
+                    progress.style.width = (10 + (i + 1) * 18) + '%';
+                    const response = await fetch(urls[i], { 
+                        method: 'HEAD',
+                        cache: 'no-cache',
+                        mode: 'no-cors'
+                    });
+                    html += `<p class="status-good">✅ ${urls[i]}: Working</p>`;
+                    successCount++;
+                } catch (error) {
+                    html += `<p class="status-error">❌ ${urls[i]}: ${error.message}</p>`;
+                }
+            }
+            
+            progress.style.width = '100%';
+            
+            if (successCount === urls.length) {
+                html += '<div class="solution-box"><p class="status-good"><strong>🎉 All URLs are accessible! Try clearing your browser cache.</strong></p></div>';
+            } else {
+                html += '<div class="solution-box"><p class="status-warning"><strong>⚠️ Some URLs may have issues. Try the solutions above.</strong></p></div>';
+            }
+            
+            results.innerHTML = html;
+        }
+
+        // Check if we're running this diagnostic from the correct location
+        if (window.location.hostname === 'localhost') {
+            console.log('✅ Running on localhost - good!');
+        } else {
+            document.body.insertAdjacentHTML('afterbegin', 
+                '<div style="background: #dc3545; padding: 15px; text-align: center; font-weight: bold;">' +
+                '⚠️ WARNING: This diagnostic should be run from http://localhost/ for accurate results!' +
+                '</div>'
+            );
+        }
+    </script>
+</body>
+</html>

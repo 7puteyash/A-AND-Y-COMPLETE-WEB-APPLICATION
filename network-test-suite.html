@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Error Simulation & Testing</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background: #0a0b0f; color: #ffffff; }
+        .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .test-card { background: #101114; padding: 20px; border-radius: 8px; border: 1px solid #d4af37; }
+        .success { color: #28a745; } .error { color: #dc3545; } .warning { color: #ffc107; } .info { color: #17a2b8; }
+        button { padding: 8px 16px; background: linear-gradient(135deg, #d4af37, #b8941f); color: #000; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 4px; background: rgba(255,255,255,0.05); }
+        pre { background: #000; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .log { height: 300px; overflow-y: auto; background: #000; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 COMPREHENSIVE NETWORK ERROR TESTING SUITE</h1>
+
+    <div class="test-grid">
+        <!-- 1. Basic API Tests -->
+        <div class="test-card">
+            <h3>1. 📡 Basic API Tests</h3>
+            <button onclick="testBasicAPI()">Test Basic API</button>
+            <button onclick="clearResults('basic-api')">Clear</button>
+            <div id="basic-api" class="log"></div>
+        </div>
+
+        <!-- 2. Error Condition Tests -->
+        <div class="test-card">
+            <h3>2. ⚠️ Error Condition Tests</h3>
+            <button onclick="testErrorConditions()">Test Error Conditions</button>
+            <button onclick="clearResults('error-conditions')">Clear</button>
+            <div id="error-conditions" class="log"></div>
+        </div>
+
+        <!-- 3. Performance & Timeout Tests -->
+        <div class="test-card">
+            <h3>3. ⏱️ Performance Tests</h3>
+            <button onclick="testPerformance()">Test Performance</button>
+            <button onclick="testTimeouts()">Test Timeouts</button>
+            <button onclick="clearResults('performance')">Clear</button>
+            <div id="performance" class="log"></div>
+        </div>
+
+        <!-- 4. Security Tests -->
+        <div class="test-card">
+            <h3>4. 🔐 Security Tests</h3>
+            <button onclick="testSecurity()">Test Security</button>
+            <button onclick="clearResults('security')">Clear</button>
+            <div id="security" class="log"></div>
+        </div>
+
+        <!-- 5. Data Format Tests -->
+        <div class="test-card">
+            <h3>5. 📋 Data Format Tests</h3>
+            <button onclick="testDataFormats()">Test Data Formats</button>
+            <button onclick="clearResults('data-formats')">Clear</button>
+            <div id="data-formats" class="log"></div>
+        </div>
+
+        <!-- 6. Debug API Tests -->
+        <div class="test-card">
+            <h3>6. 🐛 Debug API Tests</h3>
+            <button onclick="testDebugAPI()">Test Debug API</button>
+            <button onclick="clearResults('debug-api')">Clear</button>
+            <div id="debug-api" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(containerId, message, type) {
+            type = type || 'info';
+            const container = document.getElementById(containerId);
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = { info: '#17a2b8', success: '#28a745', error: '#dc3545', warning: '#ffc107' };
+            const color = colors[type];
+            container.innerHTML += '<div style="color: ' + color + ';">[' + timestamp + '] ' + message + '</div>';
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearResults(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+        }
+
+        // 1. Basic API Tests
+        async function testBasicAPI() {
+            clearResults('basic-api');
+            log('basic-api', '🔄 Starting basic API tests...', 'warning');
+
+            const tests = [
+                { name: 'GET /src/api/contact.php', method: 'GET', url: './src/api/contact.php' },
+                { name: 'OPTIONS /src/api/contact.php', method: 'OPTIONS', url: './src/api/contact.php' },
+                { name: 'GET /get-csrf-token.php', method: 'GET', url: './get-csrf-token.php' },
+                { name: 'GET /server-diagnostic.php', method: 'GET', url: './server-diagnostic.php' }
+            ];
+
+            for (const test of tests) {
+                try {
+                    const start = performance.now();
+                    const response = await fetch(test.url, { method: test.method });
+                    const end = performance.now();
+                    const responseTime = Math.round(end - start);
+
+                    log('basic-api', test.name + ': Status ' + response.status + ' (' + responseTime + 'ms)', 
+                        response.ok ? 'success' : 'warning');
+
+                    if (test.method === 'GET' && response.ok) {
+                        const text = await response.text();
+                        log('basic-api', '  Response length: ' + text.length + ' characters', 'info');
+                        
+                        if (test.name.includes('contact.php')) {
+                            try {
+                                JSON.parse(text);
+                                log('basic-api', '  ✅ Valid JSON response', 'success');
+                            } catch {
+                                log('basic-api', '  ❌ Invalid JSON response', 'error');
+                                log('basic-api', '  First 100 chars: ' + text.substring(0, 100), 'error');
+                            }
+                        }
+                    }
+                } catch (error) {
+                    log('basic-api', test.name + ': ❌ ' + error.message, 'error');
+                }
+            }
+        }
+
+        // 2. Error Condition Tests
+        async function testErrorConditions() {
+            clearResults('error-conditions');
+            log('error-conditions', '🔄 Testing error conditions...', 'warning');
+
+            const errorTests = [
+                {
+                    name: 'POST without CSRF token',
+                    test: async function() {
+                        const formData = new FormData();
+                        formData.append('name', 'Test');
+                        formData.append('email', 'test@test.com');
+                        formData.append('phone', '123456789');
+                        formData.append('message', 'Test message');
+                        return fetch('./src/api/contact.php', { method: 'POST', body: formData });
+                    }
+                },
+                {
+                    name: 'POST with invalid CSRF token',
+                    test: async function() {
+                        const formData = new FormData();
+                        formData.append('csrf_token', 'invalid_token');
+                        formData.append('name', 'Test');
+                        formData.append('email', 'test@test.com');
+                        formData.append('phone', '123456789');
+                        formData.append('message', 'Test message');
+                        return fetch('./src/api/contact.php', { method: 'POST', body: formData });
+                    }
+                },
+                {
+                    name: 'POST with missing fields',
+                    test: async function() {
+                        const csrfResponse = await fetch('./get-csrf-token.php');
+                        const csrfData = await csrfResponse.json();
+                        const formData = new FormData();
+                        formData.append('csrf_token', csrfData.csrf_token);
+                        formData.append('name', 'Test');
+                        // Missing email, phone, message
+                        return fetch('./src/api/contact.php', { method: 'POST', body: formData });
+                    }
+                },
+                {
+                    name: 'POST with invalid email',
+                    test: async function() {
+                        const csrfResponse = await fetch('./get-csrf-token.php');
+                        const csrfData = await csrfResponse.json();
+                        const formData = new FormData();
+                        formData.append('csrf_token', csrfData.csrf_token);
+                        formData.append('name', 'Test User');
+                        formData.append('email', 'invalid-email');
+                        formData.append('phone', '123456789');
+                        formData.append('message', 'Test message');
+                        return fetch('./src/api/contact.php', { method: 'POST', body: formData });
+                    }
+                }
+            ];
+
+            for (const errorTest of errorTests) {
+                try {
+                    const response = await errorTest.test();
+                    const text = await response.text();
+                    
+                    log('error-conditions', errorTest.name + ': Status ' + response.status, 
+                        response.status >= 400 ? 'success' : 'warning');
+
+                    try {
+                        const data = JSON.parse(text);
+                        log('error-conditions', '  Message: ' + data.message, 'info');
+                    } catch {
+                        log('error-conditions', '  ❌ Non-JSON response: ' + text.substring(0, 100), 'error');
+                    }
+                } catch (error) {
+                    log('error-conditions', errorTest.name + ': ❌ ' + error.message, 'error');
+                }
+            }
+        }
+
+        // 3. Performance Tests
+        async function testPerformance() {
+            clearResults('performance');
+            log('performance', '🔄 Testing performance...', 'warning');
+
+            const endpoint = './src/api/contact.php';
+            const iterations = 5;
+            const times = [];
+
+            for (let i = 0; i < iterations; i++) {
+                try {
+                    const start = performance.now();
+                    const response = await fetch(endpoint, { method: 'GET' });
+                    const end = performance.now();
+                    const time = end - start;
+                    times.push(time);
+                    
+                    log('performance', 'Request ' + (i + 1) + ': ' + Math.round(time) + 'ms (Status: ' + response.status + ')', 
+                        time < 500 ? 'success' : time < 1000 ? 'warning' : 'error');
+                } catch (error) {
+                    log('performance', 'Request ' + (i + 1) + ': ❌ ' + error.message, 'error');
+                }
+            }
+
+            if (times.length > 0) {
+                const avg = Math.round(times.reduce((a, b) => a + b) / times.length);
+                const min = Math.round(Math.min(...times));
+                const max = Math.round(Math.max(...times));
+                
+                log('performance', '📊 Average: ' + avg + 'ms | Min: ' + min + 'ms | Max: ' + max + 'ms', 
+                    avg < 500 ? 'success' : avg < 1000 ? 'warning' : 'error');
+            }
+        }
+
+        async function testTimeouts() {
+            log('performance', '🔄 Testing timeout scenarios...', 'warning');
+            
+            // Test with very short timeout
+            try {
+                const controller = new AbortController();
+                setTimeout(() => controller.abort(), 1); // 1ms timeout
+                
+                await fetch('./src/api/contact.php', {
+                    method: 'GET',
+                    signal: controller.signal
+                });
+                
+                log('performance', '⚠️ Request completed despite timeout', 'warning');
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    log('performance', '✅ Timeout handled correctly', 'success');
+                } else {
+                    log('performance', '❌ Unexpected error: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // 4. Security Tests
+        async function testSecurity() {
+            clearResults('security');
+            log('security', '🔄 Testing security features...', 'warning');
+
+            // Test CORS headers
+            try {
+                const response = await fetch('./src/api/contact.php', { method: 'GET' });
+                const corsOrigin = response.headers.get('Access-Control-Allow-Origin');
+                const corsHeaders = response.headers.get('Access-Control-Allow-Headers');
+                const corsMethods = response.headers.get('Access-Control-Allow-Methods');
+
+                log('security', 'CORS Origin: ' + (corsOrigin || 'Not set'), corsOrigin ? 'success' : 'warning');
+                log('security', 'CORS Methods: ' + (corsMethods || 'Not set'), corsMethods ? 'success' : 'warning');
+                log('security', 'CORS Headers: ' + (corsHeaders || 'Not set'), corsHeaders ? 'success' : 'warning');
+            } catch (error) {
+                log('security', 'CORS test failed: ' + error.message, 'error');
+            }
+
+            // Test Content-Type header
+            try {
+                const response = await fetch('./src/api/contact.php', { method: 'GET' });
+                const contentType = response.headers.get('Content-Type');
+                log('security', 'Content-Type: ' + contentType, 
+                    contentType && contentType.includes('application/json') ? 'success' : 'warning');
+            } catch (error) {
+                log('security', 'Content-Type test failed: ' + error.message, 'error');
+            }
+
+            // Test CSRF token security
+            try {
+                const response1 = await fetch('./get-csrf-token.php');
+                const data1 = await response1.json();
+                const response2 = await fetch('./get-csrf-token.php');
+                const data2 = await response2.json();
+
+                if (data1.csrf_token === data2.csrf_token) {
+                    log('security', '✅ CSRF tokens consistent within session', 'success');
+                } else {
+                    log('security', '⚠️ CSRF tokens changing (could indicate session issues)', 'warning');
+                }
+
+                if (data1.csrf_token && data1.csrf_token.length >= 32) {
+                    log('security', '✅ CSRF token appears secure (sufficient length)', 'success');
+                } else {
+                    log('security', '❌ CSRF token may be weak', 'error');
+                }
+            } catch (error) {
+                log('security', 'CSRF test failed: ' + error.message, 'error');
+            }
+        }
+
+        // 5. Data Format Tests
+        async function testDataFormats() {
+            clearResults('data-formats');
+            log('data-formats', '🔄 Testing data format handling...', 'warning');
+
+            const dataTests = [
+                {
+                    name: 'Very long name field',
+                    data: { name: 'A'.repeat(1000), email: 'test@test.com', phone: '123456789', message: 'Test' }
+                },
+                {
+                    name: 'Very long message field',
+                    data: { name: 'Test', email: 'test@test.com', phone: '123456789', message: 'X'.repeat(5000) }
+                },
+                {
+                    name: 'Special characters in name',
+                    data: { name: '', email: 'test@test.com', phone: '123456789', message: 'Test' }
+                },
+                {
+                    name: 'Unicode characters',
+                    data: { name: 'Test 测试 🌟', email: 'test@test.com', phone: '123456789', message: 'Unicode test 中文 🚀' }
+                },
+                {
+                    name: 'Empty strings',
+                    data: { name: '', email: '', phone: '', message: '' }
+                }
+            ];
+
+            for (const test of dataTests) {
+                try {
+                    const csrfResponse = await fetch('./get-csrf-token.php');
+                    const csrfData = await csrfResponse.json();
+                    
+                    const formData = new FormData();
+                    formData.append('csrf_token', csrfData.csrf_token);
+                    Object.keys(test.data).forEach(key => {
+                        formData.append(key, test.data[key]);
+                    });
+
+                    const response = await fetch('./src/api/contact.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const text = await response.text();
+                    
+                    log('data-formats', test.name + ': Status ' + response.status, 
+                        response.status >= 400 ? 'success' : 'info');
+
+                    try {
+                        const data = JSON.parse(text);
+                        log('data-formats', '  Response: ' + data.message, 'info');
+                    } catch {
+                        log('data-formats', '  ❌ Invalid JSON response', 'error');
+                        log('data-formats', '  Raw: ' + text.substring(0, 200), 'error');
+                    }
+                } catch (error) {
+                    log('data-formats', test.name + ': ❌ ' + error.message, 'error');
+                }
+            }
+        }
+
+        // 6. Debug API Tests
+        async function testDebugAPI() {
+            clearResults('debug-api');
+            log('debug-api', '🔄 Testing debug API...', 'warning');
+
+            try {
+                const response = await fetch('./src/api/contact-debug.php', { method: 'GET' });
+                const text = await response.text();
+                
+                log('debug-api', 'Debug API Status: ' + response.status, response.ok ? 'success' : 'error');
+                
+                try {
+                    const data = JSON.parse(text);
+                    log('debug-api', 'Debug Response: ' + data.message, 'info');
+                } catch {
+                    log('debug-api', '❌ Debug API returned non-JSON', 'error');
+                    log('debug-api', 'First 200 chars: ' + text.substring(0, 200), 'error');
+                }
+
+                // Test debug API with POST
+                const csrfResponse = await fetch('./get-csrf-token.php');
+                const csrfData = await csrfResponse.json();
+                
+                const formData = new FormData();
+                formData.append('csrf_token', csrfData.csrf_token);
+                formData.append('name', 'Debug Test User');
+                formData.append('email', 'debug@test.com');
+                formData.append('phone', '1234567890');
+                formData.append('message', 'This is a debug test message');
+
+                const postResponse = await fetch('./src/api/contact-debug.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const postText = await postResponse.text();
+                log('debug-api', 'Debug POST Status: ' + postResponse.status, postResponse.ok ? 'success' : 'error');
+                
+                try {
+                    const postData = JSON.parse(postText);
+                    log('debug-api', 'Debug POST Response: ' + postData.message, 'success');
+                } catch {
+                    log('debug-api', '❌ Debug POST returned non-JSON', 'error');
+                    log('debug-api', 'POST response: ' + postText.substring(0, 200), 'error');
+                }
+
+            } catch (error) {
+                log('debug-api', 'Debug API test failed: ' + error.message, 'error');
+            }
+        }
+
+        // Auto-run basic tests on load
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                testBasicAPI();
+                testCSS();
+            }, 1000);
+        });
+        
+        // Additional CSS Testing Function
+        function testCSS() {
+            log('basic-api', '🔄 Testing CSS loading...', 'warning');
+            
+            const tests = [];
+            
+            // Test Bootstrap CSS
+            const bootstrapTest = document.querySelector('body');
+            if (bootstrapTest && window.getComputedStyle(bootstrapTest).fontFamily) {
+                tests.push('✅ Bootstrap CSS loaded');
+            } else {
+                tests.push('❌ Bootstrap CSS failed');
+            }
+            
+            // Test Font Awesome CSS
+            const fontAwesomeTest = document.querySelector('.fas, .fab, .far');
+            if (fontAwesomeTest || document.querySelector('link[href*="font-awesome"]')) {
+                tests.push('✅ Font Awesome CSS loaded');
+            } else {
+                tests.push('❌ Font Awesome CSS failed');
+            }
+            
+            // Test Custom CSS
+            const customTest = document.querySelector('.test-card');
+            if (customTest && window.getComputedStyle(customTest).backgroundColor === 'rgb(16, 17, 20)') {
+                tests.push('✅ Custom CSS loaded');
+            } else {
+                tests.push('❌ Custom CSS failed');
+            }
+            
+            // Test responsive design
+            const isResponsive = window.matchMedia('(max-width: 768px)').matches;
+            tests.push('📱 Responsive mode: ' + (isResponsive ? 'Mobile' : 'Desktop'));
+            
+            tests.forEach(function(test) {
+                if (test.includes('✅')) {
+                    log('basic-api', test, 'success');
+                } else if (test.includes('❌')) {
+                    log('basic-api', test, 'error');
+                } else {
+                    log('basic-api', test, 'info');
+                }
+            });
+        }
+
+        // Add global error handler for uncaught errors
+        window.addEventListener('error', function(event) {
+            log('basic-api', '🚨 Global Error: ' + event.error.message, 'error');
+        });
+
+        // Add unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function(event) {
+            log('basic-api', '🚨 Unhandled Promise Rejection: ' + event.reason, 'error');
+        });
+    </script>
+</body>
+</html>

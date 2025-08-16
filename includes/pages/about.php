@@ -6,8 +6,10 @@ if (!defined('ABSPATH')) {
 <!-- About Hero -->
 <section class="page-hero py-5 bg-dark">
     <div class="container">
-        <h1 class="section-title text-center">About Us</h1>
-        <p class="lead text-center mb-0">Our Story, Mission, and Values</p>
+        <div class="text-center" style="margin-top: 2rem;">
+            <h1 class="section-title">ABOUT US</h1>
+            <p class="lead mb-0">Our Story, Mission, and Values</p>
+        </div>
     </div>
 </section>
 
